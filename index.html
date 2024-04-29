@@ -15,22 +15,43 @@
   <div id="app">
     <v-app>
       <v-app-bar app color="primary" density="compact" dark fixed >
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>题库({{title}})</v-toolbar-title>
       </v-app-bar>
+      <v-navigation-drawer v-model="drawer" temporary>
+        <v-list>
+          <v-list-item v-for="(lib, i) in libs" @click="changeLib(i)">
+            <template v-slot:prepend>
+              <v-icon icon="mdi-note-text-outline"></v-icon>
+            </template>
+            <v-list-item-title v-text="lib.title"></v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
       <v-main>
         <v-container>
           <v-card v-if="currQuestion" width="100%" >
             <v-card-text>
               <p>{{currQuestion.content}}</p>
               <br/>
-              <v-radio-group v-model="currSelected" color="primary">
-                <v-radio v-for="(item, i) in currQuestion.options" :label="indexToLetter(i)+'. '+item" :value="indexToLetter(i)"></v-radio>
-              </v-radio-group>
+              <div v-if="currQuestion.type == 1">
+                <v-radio-group v-model="currSelected" color="primary">
+                  <v-radio v-for="(item, i) in currQuestion.options" :label="indexToLetter(i)+'. '+item" :value="indexToLetter(i)"></v-radio>
+                </v-radio-group>
+              </div>
+              <div v-else-if="currQuestion.type == 2">
+                <v-checkbox v-for="(item, i) in currQuestion.options" v-model="currSelected" color="primary" density="compact" :label="indexToLetter(i)+'. '+item" :value="indexToLetter(i)"></v-checkbox>
+              </div>
+              <div v-else-if="currQuestion.type == 3">
+                <v-radio-group v-model="currSelected" color="primary">
+                  <v-radio label="正确" value="正确"></v-radio>
+                  <v-radio label="错误" value="错误"></v-radio>
+                </v-radio-group>
+              </div>
             </v-card-text>
           </v-card>
-          <v-alert v-show="showAnswer" :title="'正确答案为：'+currQuestion.answer" type="error" ></v-alert>
-          <div style="position: absolute; width: 100%; height: 48px; bottom: 0; left: 0;">
+          <v-alert v-show="showAnswer" :title="'答案为：'+currQuestion.answer" type="error" ></v-alert>
+          <div v-if="questionAll" style="position: absolute; width: 100%; height: 48px; bottom: 0; left: 0;">
             <v-row>
               <v-col class="text-center">
                 <v-btn prepend-icon="mdi mdi-chevron-left" @click="prev">上一题</v-btn>
